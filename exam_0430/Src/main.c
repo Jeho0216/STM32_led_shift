@@ -75,8 +75,8 @@ void Byte_data_write(uint8_t data);
 int main(void)
 {
 	/* USER CODE BEGIN 1 */
-	int pattern = 0x00;
-	int index = 0;
+	int pattern = 0x80;
+	int led_direction = 0;		//LED출력 방향. 0은 좌, 1은 우측으로 shift
 	/* USER CODE END 1 */
 
 	/* MCU Configuration----------------------------------------------------------*/
@@ -105,10 +105,29 @@ int main(void)
 	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		pattern = ~(0x80 >> index);
-		index = (index + 1) % 8;
+		if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0) == 0){
+			led_direction = 0;
+		}
+		else if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1) == 0){
+			led_direction = 1;
+		}
 
-		Byte_data_write(pattern);
+		if(led_direction == 0){		//좌로 shift
+			if(pattern == 0x01)
+				pattern = 0x80;
+			else
+				pattern = pattern >> 0x01;
+			Byte_data_write((~pattern));
+		}
+
+		else if(led_direction == 1){		//우로 shift
+			if(pattern == 0x80)
+				pattern = 0x01;
+			else
+				pattern = pattern << 0x01;
+			Byte_data_write((~pattern));
+		}
+
 		HAL_Delay(300);
 		/* USER CODE END WHILE */
 
